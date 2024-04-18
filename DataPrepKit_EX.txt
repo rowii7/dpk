@@ -1,0 +1,128 @@
+How to use DataPrepKit
+########################################################
+to read the data:
+########################################################
+data_prep_kit = DataPrepKit("/content/drive/MyDrive/bank.csv")
+
+this will directly read the data and print it out and the result for my data was:
+
+     age     sex      region    income married save_act
+0    48  FEMALE  INNER_CITY  17546.00      NO       NO
+1    40    MALE        TOWN  30085.10     YES       NO
+2    51  FEMALE  INNER_CITY  16575.40     YES      YES
+3    23  FEMALE        TOWN       NaN     YES       NO
+4    57  FEMALE       RURAL  50576.30     YES      YES
+5    57  FEMALE        TOWN  37869.60     YES      YES
+6    22    MALE       RURAL   8877.07      NO       NO
+7    58    MALE        TOWN  24946.60     YES      YES
+8    37  FEMALE    SUBURBAN       NaN     YES       NO
+9    54    MALE        TOWN  24212.10     YES      YES
+10   66  FEMALE        TOWN  59803.90     YES      YES
+11   52  FEMALE  INNER_CITY       NaN      NO      YES
+
+########################################################
+to handle missing values there are several ways to fillmissing data:
+########################################################
+1. data_prep.handle_missing_values(strategy='mean')
+
+    age     sex      region        income married save_act
+0    48  FEMALE  INNER_CITY  17546.000000      NO       NO
+1    40    MALE        TOWN  30085.100000     YES       NO
+2    51  FEMALE  INNER_CITY  16575.400000     YES      YES
+3    23  FEMALE        TOWN  30054.674444     YES       NO
+4    57  FEMALE       RURAL  50576.300000     YES      YES
+5    57  FEMALE        TOWN  37869.600000     YES      YES
+6    22    MALE       RURAL   8877.070000      NO       NO
+7    58    MALE        TOWN  24946.600000     YES      YES
+8    37  FEMALE    SUBURBAN  30054.674444     YES       NO
+9    54    MALE        TOWN  24212.100000     YES      YES
+10   66  FEMALE        TOWN  59803.900000     YES      YES
+11   52  FEMALE  INNER_CITY  30054.674444      NO      YES
+
+
+2. data_prep.handle_missing_values(strategy='median')
+
+    age     sex      region    income married save_act
+0    48  FEMALE  INNER_CITY  17546.00      NO       NO
+1    40    MALE        TOWN  30085.10     YES       NO
+2    51  FEMALE  INNER_CITY  16575.40     YES      YES
+3    23  FEMALE        TOWN  24946.60     YES       NO
+4    57  FEMALE       RURAL  50576.30     YES      YES
+5    57  FEMALE        TOWN  37869.60     YES      YES
+6    22    MALE       RURAL   8877.07      NO       NO
+7    58    MALE        TOWN  24946.60     YES      YES
+8    37  FEMALE    SUBURBAN  24946.60     YES       NO
+9    54    MALE        TOWN  24212.10     YES      YES
+10   66  FEMALE        TOWN  59803.90     YES      YES
+11   52  FEMALE  INNER_CITY  24946.60      NO      YES
+
+3. data_prep.handle_missing_values(strategy='mode')
+
+or you can just drop the rows with missing values
+data_prep.handle_missing_values(strategy='drop')
+
+    age     sex      region    income married save_act
+0    48  FEMALE  INNER_CITY  17546.00      NO       NO
+1    40    MALE        TOWN  30085.10     YES       NO
+2    51  FEMALE  INNER_CITY  16575.40     YES      YES
+4    57  FEMALE       RURAL  50576.30     YES      YES
+5    57  FEMALE        TOWN  37869.60     YES      YES
+6    22    MALE       RURAL   8877.07      NO       NO
+7    58    MALE        TOWN  24946.60     YES      YES
+9    54    MALE        TOWN  24212.10     YES      YES
+10   66  FEMALE        TOWN  59803.90     YES      YES
+
+########################################################
+summary for data:
+########################################################
+1. data_prep.statistics()
+
+this will print out the statistical summary for all data type
+               Average  Std Deviation     Mode
+age          47.083333      13.300741     57.0
+income    30054.674444   15684.756685  8877.07
+married            NaN            NaN      YES
+region             NaN            NaN     TOWN
+save_act           NaN            NaN      YES
+sex                NaN            NaN   FEMALE
+
+2. data_prep.numeric_data_summary()
+
+this will give summary for numeric data only
+
+             age        income
+count  12.000000      9.000000
+mean   47.083333  30054.674444
+std    13.892171  16636.196720
+min    22.000000   8877.070000
+25%    39.250000  17546.000000
+50%    51.500000  24946.600000
+75%    57.000000  37869.600000
+max    66.000000  59803.900000
+
+########################################################
+Categorical Encoding
+########################################################
+Categorical data can be boolean like yes-no , true-false or it can have multi-class at the same column like red , blue , green 
+when handling this you need different types of encoding so to encode all your data I did the following :
+# Encode categorical data
+encoder = CategoricalEncoding(data_prep.data)
+encoder.one_hot_encode('region')  
+encoder.label_encode('married')
+encoder.label_encode('save_act')
+encoder.label_encode('sex')
+encoded_data = encoder.get_encoded_data()
+print(encoded_data)
+ age  sex    income  married  save_act  region_INNER_CITY region_RURAL     region_SUBURBAN  region_TOWN
+0    48    0  17546.00        0         0                1.0           0.0             0.0          0.0
+1    40    1  30085.10        1         0                0.0           0.0             0.0          1.0
+2    51    0  16575.40        1         1                1.0           0.0             0.0          0.0
+3    23    0       NaN        1         0                0.0           0.0             0.0          1.0
+4    57    0  50576.30        1         1                0.0           1.0             0.0          0.0
+5    57    0  37869.60        1         1                0.0           0.0             0.0          1.0
+6    22    1   8877.07        0         0                0.0           1.0             0.0          0.0
+7    58    1  24946.60        1         1                0.0           0.0             0.0          1.0          
+8    37    0       NaN        1         0                0.0           0.0             1.0          0.0
+9    54    1  24212.10        1         1                0.0           0.0             0.0          1.0
+10   66    0  59803.90        1         1                0.0           0.0             0.0          1.0 
+11   52    0       NaN        0         1                1.0           0.0             0.0          0.0
